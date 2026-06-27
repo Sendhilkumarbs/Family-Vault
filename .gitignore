@@ -1,18 +1,25 @@
-# Build output
+# Maven build output
 target/
-*.jar
+
+# Archives
 *.zip
 
-# Local runtime data (contains personal/family records)
+# Local dev runtime data (not the portable package)
 data/
-dist/data/
 logs/
-
-# Runtime config (may contain email credentials)
 /config/
 
-# Bundled JRE (large; rebuild locally)
+# Legacy dist dev copies
 dist/runtime/
+dist/data/
+
+# FamilyVault — exclude only private user data, keep the portable package
+FamilyVault/data/**
+!FamilyVault/data/.gitkeep
+FamilyVault/logs/**
+!FamilyVault/logs/.gitkeep
+FamilyVault/config/**
+!FamilyVault/config/.gitkeep
 
 # IDE
 .idea/
@@ -26,7 +33,7 @@ dist/runtime/
 .DS_Store
 Thumbs.db
 
-# H2 database files
+# H2 database files (outside FamilyVault package paths)
 *.db
 *.mv.db
 *.trace.db
