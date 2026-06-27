@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Fixed &amp; Recurring Deposits — ' + ${appName}">Deposits</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ─── Navbar ─────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a th:href="@{/deposits/new}" class="btn btn-light btn-sm fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Add FD / RD
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- ─── Success / Error Messages ───────────────────────── -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Stats & Search Bar ─────────────────────────────── -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-5">
+            <div class="d-flex gap-3">
+                <div class="stats-card p-3 rounded-3 flex-fill">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon me-3" style="background: linear-gradient(135deg, #276749 0%, #38a169 100%);">
+                            <i class="bi bi-piggy-bank fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Fixed Deposits</div>
+                            <div class="fs-4 fw-bold" th:text="${fdCount}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-card p-3 rounded-3 flex-fill">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon me-3" style="background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);">
+                            <i class="bi bi-arrow-repeat fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Recurring Deposits</div>
+                            <div class="fs-4 fw-bold" th:text="${rdCount}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <form th:action="@{/deposits}" method="get" class="d-flex gap-2">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Search by name, bank, type, account number..."
+                           th:value="${search}"/>
+                </div>
+                <button type="submit" class="btn btn-primary-custom">Search</button>
+                <a th:href="@{/deposits}" class="btn btn-outline-secondary" th:if="${search}">Clear</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- ─── Search Indicator ───────────────────────────────── -->
+    <div th:if="${search}" class="mb-3">
+        <span class="badge bg-info fs-6">
+            <i class="bi bi-funnel me-1"></i>
+            Showing results for: "<span th:text="${search}"></span>"
+            — <span th:text="${#lists.size(deposits)}"></span> found
+        </span>
+    </div>
+
+    <!-- ─── Deposits Table ───────────────────────────────────── -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" th:if="${!#lists.isEmpty(deposits)}">
+                    <thead class="table-header-custom">
+                        <tr>
+                            <th>#</th>
+                            <th>Person</th>
+                            <th>Relationship</th>
+                            <th>Bank</th>
+                            <th>Type</th>
+                            <th>Account No.</th>
+                            <th>Amount</th>
+                            <th>Interest</th>
+                            <th>Maturity Date</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="deposit, iter : ${deposits}">
+                            <td class="text-muted" th:text="${iter.index + 1}"></td>
+                            <td>
+                                <div class="fw-semibold" th:text="${deposit.personName}"></div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-subtle text-dark"
+                                      th:text="${deposit.relationship}"></span>
+                            </td>
+                            <td th:text="${deposit.bankName}"></td>
+                            <td>
+                                <span class="badge rounded-pill"
+                                      th:classappend="${deposit.depositType == 'FD'} ? 'bg-success' : 'bg-info'"
+                                      th:text="${deposit.depositType}"></span>
+                            </td>
+                            <td class="font-monospace" th:text="${deposit.depositAccountNumber}"></td>
+                            <td th:text="${deposit.depositAmount}"></td>
+                            <td th:text="${deposit.interestRate}"></td>
+                            <td th:text="${deposit.maturityDate}"></td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/deposits/view/{id}(id=${deposit.id})}"
+                                       class="btn btn-outline-primary" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a th:href="@{/deposits/edit/{id}(id=${deposit.id})}"
+                                       class="btn btn-outline-success" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/deposits/delete/{id}(id=${deposit.id})}"
+                                       class="btn btn-outline-danger" title="Delete"
+                                       onclick="return confirm('Are you sure you want to delete this deposit?');">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(deposits)}" class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <h5 class="mt-3 text-muted">No deposits found</h5>
+                    <p class="text-muted" th:if="${search}">Try a different search term.</p>
+                    <p class="text-muted" th:unless="${search}">Start by adding your first Fixed or Recurring Deposit.</p>
+                    <a th:href="@{/deposits/new}" class="btn btn-primary-custom mt-2">
+                        <i class="bi bi-plus-circle me-1"></i> Add First FD / RD
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Footer ─────────────────────────────────────────── -->
+    <footer class="text-center text-muted py-4 mt-4 border-top">
+        <small th:text="${appName} + ' © 2026 — Data stored locally on your machine.'">Family Vault © 2026 — Data stored locally on your machine.</small>
+    </footer>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

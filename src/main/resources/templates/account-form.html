@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — ' + ${appName}">Account Form</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <a th:href="@{/accounts}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Accounts
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-pencil-square me-2 text-primary-custom"
+               th:if="${account.id != null}"></i>
+            <i class="bi bi-plus-circle me-2 text-primary-custom"
+               th:if="${account.id == null}"></i>
+            <span th:text="${pageTitle}">Account Form</span>
+        </h3>
+    </div>
+
+    <form th:action="${account.id != null}
+              ? @{/accounts/update/{id}(id=${account.id})}
+              : @{/accounts/save}"
+          th:object="${account}" method="post" id="accountForm">
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 1: Personal Information
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-person-fill me-2"></i> Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Person Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{personName}"
+                               placeholder="e.g. Rajesh Kumar" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Relationship</label>
+                        <select class="form-select" th:field="*{relationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Self">Self</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 2: Bank Account Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-bank me-2"></i> Bank Account Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Bank Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{bankName}"
+                               placeholder="e.g. State Bank of India" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Branch Name</label>
+                        <input type="text" class="form-control" th:field="*{branchName}"
+                               placeholder="e.g. Anna Nagar Branch"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Account Type <span class="text-danger">*</span></label>
+                        <select class="form-select" th:field="*{accountType}" id="accountTypeSelect" required>
+                            <option value="">-- Select --</option>
+                            <option value="Savings">Savings Account</option>
+                            <option value="Current">Current Account</option>
+                            <option value="Joint">Joint Account</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Customer ID</label>
+                        <input type="text" class="form-control font-monospace" th:field="*{customerId}"
+                               placeholder="e.g. 12345678"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Account Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control font-monospace" th:field="*{accountNumber}"
+                               placeholder="e.g. 1234567890123456" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">IFSC Code</label>
+                        <input type="text" class="form-control text-uppercase" th:field="*{ifscCode}"
+                               placeholder="e.g. SBIN0001234"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">MICR Code</label>
+                        <input type="text" class="form-control" th:field="*{micrCode}"
+                               placeholder="e.g. 600002001"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 3: Joint Account Details (conditional)
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4" id="jointSection" style="display: none;">
+            <div class="card-header section-header-joint">
+                <i class="bi bi-people-fill me-2"></i> Joint Account Holder Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Joint Holder Name</label>
+                        <input type="text" class="form-control" th:field="*{jointHolderName}"
+                               placeholder="e.g. Priya Kumar"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Joint Holder Relationship</label>
+                        <select class="form-select" th:field="*{jointHolderRelationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 4: Net Banking Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-globe me-2"></i> Net Banking Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Net Banking User ID</label>
+                        <input type="text" class="form-control" th:field="*{netBankingUserId}"
+                               placeholder="e.g. rajesh_kumar"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Net Banking Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{netBankingPassword}"
+                                   placeholder="Enter password"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Transaction Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{transactionPassword}"
+                                   placeholder="Enter password"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 5: Mobile Banking Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-phone me-2"></i> Mobile Banking Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Registered Mobile Number</label>
+                        <input type="text" class="form-control" th:field="*{registeredMobileNumber}"
+                               placeholder="e.g. 9876543210"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Mobile Banking PIN / Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{mobileBankingPin}"
+                                   placeholder="Enter PIN"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">UPI ID</label>
+                        <input type="text" class="form-control" th:field="*{upiId}"
+                               placeholder="e.g. rajesh@oksbi"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 6: Card Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-credit-card me-2"></i> Debit Card Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Debit Card Number</label>
+                        <input type="text" class="form-control font-monospace" th:field="*{debitCardNumber}"
+                               placeholder="e.g. 4321 5678 9012 3456"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Debit Card PIN</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{debitCardPin}"
+                                   placeholder="PIN"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Expiry Date</label>
+                        <input type="text" class="form-control" th:field="*{debitCardExpiryDate}"
+                               placeholder="MM/YY"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">CVV</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{debitCardCvv}"
+                                   placeholder="CVV" maxlength="4"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-credit-card-2-front me-2"></i> Credit Card Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Credit Card Number</label>
+                        <input type="text" class="form-control font-monospace" th:field="*{creditCardNumber}"
+                               placeholder="e.g. 5432 1678 9012 3456"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Credit Card PIN</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{creditCardPin}"
+                                   placeholder="PIN"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Expiry Date</label>
+                        <input type="text" class="form-control" th:field="*{creditCardExpiryDate}"
+                               placeholder="MM/YY"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">CVV</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" th:field="*{creditCardCvv}"
+                                   placeholder="CVV" maxlength="4"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Credit Limit</label>
+                        <input type="text" class="form-control" th:field="*{creditCardLimit}"
+                               placeholder="e.g. 2,00,000"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 6b: Extra Credit Cards
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header d-flex justify-content-between align-items-center"
+                 style="background: linear-gradient(135deg, #553c9a 0%, #805ad5 100%);">
+                <span><i class="bi bi-credit-card-2-front me-2"></i> Extra Credit Cards</span>
+                <button type="button" class="btn btn-sm btn-light fw-semibold" id="addCreditCardBtn">
+                    <i class="bi bi-plus-circle me-1"></i> Add Credit Card
+                </button>
+            </div>
+            <div class="card-body" id="extraCreditCardsContainer">
+                <!-- Existing extra credit cards (for edit mode) -->
+                <div th:each="card, cardStat : ${account.extraCreditCards}" class="extra-credit-card-row border rounded-3 p-3 mb-3 position-relative">
+                    <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 remove-credit-card-btn" title="Remove this card">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <div class="row g-3">
+                        <input type="hidden" th:name="${'extraCreditCards[' + cardStat.index + '].id'}" th:value="${card.id}"/>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Card Name / Label</label>
+                            <input type="text" class="form-control"
+                                   th:name="${'extraCreditCards[' + cardStat.index + '].cardName'}"
+                                   th:value="${card.cardName}"
+                                   placeholder="e.g. Amazon Pay ICICI"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Card Number</label>
+                            <input type="text" class="form-control font-monospace"
+                                   th:name="${'extraCreditCards[' + cardStat.index + '].cardNumber'}"
+                                   th:value="${card.cardNumber}"
+                                   placeholder="e.g. 5432 1678 9012 3456"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">PIN</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control password-field"
+                                       th:name="${'extraCreditCards[' + cardStat.index + '].cardPin'}"
+                                       th:value="${card.cardPin}"
+                                       placeholder="PIN"/>
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Expiry</label>
+                            <input type="text" class="form-control"
+                                   th:name="${'extraCreditCards[' + cardStat.index + '].expiryDate'}"
+                                   th:value="${card.expiryDate}"
+                                   placeholder="MM/YY"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">CVV</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control password-field"
+                                       th:name="${'extraCreditCards[' + cardStat.index + '].cvv'}"
+                                       th:value="${card.cvv}"
+                                       placeholder="CVV" maxlength="4"/>
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Credit Limit</label>
+                            <input type="text" class="form-control"
+                                   th:name="${'extraCreditCards[' + cardStat.index + '].creditLimit'}"
+                                   th:value="${card.creditLimit}"
+                                   placeholder="e.g. 2,00,000"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state message -->
+                <div id="noExtraCardsMessage" class="text-center py-3 text-muted"
+                     th:style="${#lists.isEmpty(account.extraCreditCards)} ? '' : 'display:none;'">
+                    <i class="bi bi-credit-card me-1"></i> No extra credit cards added. Click "Add Credit Card" to add one.
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 7: Additional Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-info-circle me-2"></i> Additional Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Name</label>
+                        <input type="text" class="form-control" th:field="*{nomineeName}"
+                               placeholder="e.g. Priya Kumar"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Relationship</label>
+                        <select class="form-select" th:field="*{nomineeRelationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Email Linked to Account</label>
+                        <input type="email" class="form-control" th:field="*{emailLinked}"
+                               placeholder="e.g. rajesh@gmail.com"/>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Remarks / Notes</label>
+                        <textarea class="form-control" th:field="*{remarks}" rows="3"
+                                  placeholder="Any additional notes about this account..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             Action Buttons
+             ═══════════════════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between mb-5">
+            <a th:href="@{/accounts}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary-custom btn-lg">
+                <i class="bi bi-check-circle me-1"></i>
+                <span th:text="${account.id != null} ? 'Update Account' : 'Save Account'">Save</span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+
+<script>
+    // ── Show/hide joint account section based on account type ──
+    const accountTypeSelect = document.getElementById('accountTypeSelect');
+    const jointSection = document.getElementById('jointSection');
+
+    function toggleJointSection() {
+        if (accountTypeSelect.value === 'Joint') {
+            jointSection.style.display = 'block';
+        } else {
+            jointSection.style.display = 'none';
+        }
+    }
+
+    accountTypeSelect.addEventListener('change', toggleJointSection);
+    // Run on page load (for edit mode)
+    toggleJointSection();
+
+    // ── Toggle password visibility ────────────────────────────
+    function bindTogglePassword(container) {
+        container.querySelectorAll('.toggle-password').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const input = this.closest('.input-group').querySelector('.password-field');
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
+        });
+    }
+    bindTogglePassword(document);
+
+    // ── Extra Credit Cards — Dynamic Add/Remove ────────────────
+    const extraCardsContainer = document.getElementById('extraCreditCardsContainer');
+    const addCreditCardBtn = document.getElementById('addCreditCardBtn');
+    const noExtraCardsMessage = document.getElementById('noExtraCardsMessage');
+
+    function getNextIndex() {
+        const rows = extraCardsContainer.querySelectorAll('.extra-credit-card-row');
+        let maxIdx = -1;
+        rows.forEach(function(row) {
+            const inputs = row.querySelectorAll('input[name]');
+            inputs.forEach(function(inp) {
+                const match = inp.name.match(/extraCreditCards\[(\d+)\]/);
+                if (match) {
+                    const idx = parseInt(match[1]);
+                    if (idx > maxIdx) maxIdx = idx;
+                }
+            });
+        });
+        return maxIdx + 1;
+    }
+
+    function updateNoCardsMessage() {
+        const rows = extraCardsContainer.querySelectorAll('.extra-credit-card-row');
+        noExtraCardsMessage.style.display = rows.length === 0 ? '' : 'none';
+    }
+
+    addCreditCardBtn.addEventListener('click', function() {
+        const idx = getNextIndex();
+        const html = `
+            <div class="extra-credit-card-row border rounded-3 p-3 mb-3 position-relative">
+                <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 remove-credit-card-btn" title="Remove this card">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Card Name / Label</label>
+                        <input type="text" class="form-control" name="extraCreditCards[${idx}].cardName"
+                               placeholder="e.g. Amazon Pay ICICI"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Card Number</label>
+                        <input type="text" class="form-control font-monospace" name="extraCreditCards[${idx}].cardNumber"
+                               placeholder="e.g. 5432 1678 9012 3456"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">PIN</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" name="extraCreditCards[${idx}].cardPin"
+                                   placeholder="PIN"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">Expiry</label>
+                        <input type="text" class="form-control" name="extraCreditCards[${idx}].expiryDate"
+                               placeholder="MM/YY"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">CVV</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control password-field" name="extraCreditCards[${idx}].cvv"
+                                   placeholder="CVV" maxlength="4"/>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Credit Limit</label>
+                        <input type="text" class="form-control" name="extraCreditCards[${idx}].creditLimit"
+                               placeholder="e.g. 2,00,000"/>
+                    </div>
+                </div>
+            </div>`;
+
+        noExtraCardsMessage.insertAdjacentHTML('beforebegin', html);
+        const newRow = noExtraCardsMessage.previousElementSibling;
+        bindTogglePassword(newRow);
+        bindRemoveButton(newRow);
+        updateNoCardsMessage();
+    });
+
+    function bindRemoveButton(row) {
+        row.querySelector('.remove-credit-card-btn').addEventListener('click', function() {
+            if (confirm('Remove this credit card?')) {
+                row.remove();
+                updateNoCardsMessage();
+            }
+        });
+    }
+
+    // Bind remove buttons for existing rows
+    extraCardsContainer.querySelectorAll('.extra-credit-card-row').forEach(function(row) {
+        bindRemoveButton(row);
+    });
+
+    updateNoCardsMessage();
+</script>
+
+</body>
+</html>

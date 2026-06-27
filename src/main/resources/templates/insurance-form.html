@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — ' + ${appName}">Insurance Form</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <a th:href="@{/insurance}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Insurance
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-pencil-square me-2 text-primary-custom"
+               th:if="${insurance.id != null}"></i>
+            <i class="bi bi-plus-circle me-2 text-primary-custom"
+               th:if="${insurance.id == null}"></i>
+            <span th:text="${pageTitle}">Insurance Form</span>
+        </h3>
+    </div>
+
+    <form th:action="${insurance.id != null}
+              ? @{/insurance/update/{id}(id=${insurance.id})}
+              : @{/insurance/save}"
+          th:object="${insurance}" method="post">
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 1: Personal Information
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-person-fill me-2"></i> Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Person Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{personName}"
+                               placeholder="e.g. Rajesh Kumar" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Relationship</label>
+                        <select class="form-select" th:field="*{relationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Self">Self</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 2: Insurance Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header"
+                 style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
+                <i class="bi bi-shield-check me-2"></i> Insurance Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Insurance Type <span class="text-danger">*</span></label>
+                        <select class="form-select" th:field="*{insuranceType}" required>
+                            <option value="">-- Select --</option>
+                            <option value="Life">Life Insurance</option>
+                            <option value="Health">Health Insurance</option>
+                            <option value="Vehicle">Vehicle Insurance</option>
+                            <option value="Term">Term Insurance</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Insurance Company <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{insuranceCompany}"
+                               placeholder="e.g. LIC, HDFC Life, ICICI Prudential" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Policy Name</label>
+                        <input type="text" class="form-control" th:field="*{policyName}"
+                               placeholder="e.g. Term Life Insurance, Health Shield"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Policy Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control font-monospace" th:field="*{policyNumber}"
+                               placeholder="e.g. POL123456789" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Sum Assured</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" th:field="*{sumAssured}"
+                                   placeholder="e.g. 50,00,000"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Policy Term</label>
+                        <input type="text" class="form-control" th:field="*{policyTerm}"
+                               placeholder="e.g. 20 Years, Lifetime"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 3: Premium & Dates
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header"
+                 style="background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);">
+                <i class="bi bi-calendar-event me-2"></i> Premium &amp; Important Dates
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Premium Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" th:field="*{premiumAmount}"
+                                   placeholder="e.g. 25,000"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Premium Frequency</label>
+                        <select class="form-select" th:field="*{premiumFrequency}">
+                            <option value="">-- Select --</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Quarterly">Quarterly</option>
+                            <option value="Half-Yearly">Half-Yearly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Auto Renewal</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" th:field="*{autoRenewal}" id="autoRenewalSwitch"/>
+                            <label class="form-check-label" for="autoRenewalSwitch">
+                                Yes, auto-renew policy
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Start Date</label>
+                        <input type="text" class="form-control" th:field="*{startDate}"
+                               placeholder="e.g. 01/01/2025"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Renewal Date <span class="text-warning">⚠</span></label>
+                        <input type="text" class="form-control" th:field="*{renewalDate}"
+                               placeholder="e.g. 01/01/2026"
+                               title="This date will be used for reminder alerts"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Maturity Date</label>
+                        <input type="text" class="form-control" th:field="*{maturityDate}"
+                               placeholder="e.g. 01/01/2045 (if applicable)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 4: Agent & Nominee Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-info-circle me-2"></i> Agent &amp; Nominee Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Agent Name</label>
+                        <input type="text" class="form-control" th:field="*{agentName}"
+                               placeholder="e.g. Ramesh Kumar"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Agent Contact</label>
+                        <input type="text" class="form-control" th:field="*{agentContact}"
+                               placeholder="e.g. +91 98765 43210"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Name</label>
+                        <input type="text" class="form-control" th:field="*{nomineeName}"
+                               placeholder="e.g. Priya Kumar"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Relationship</label>
+                        <select class="form-select" th:field="*{nomineeRelationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">
+                            Email Address <small class="text-muted">(for reminders)</small>
+                        </label>
+                        <input type="email" class="form-control" th:field="*{emailAddress}"
+                               placeholder="e.g. rajesh@example.com"/>
+                        <small class="text-muted">Free email notifications will be sent 7 days before renewal</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Remarks / Notes</label>
+                        <textarea class="form-control" th:field="*{remarks}" rows="3"
+                                  placeholder="Any additional notes about this insurance policy..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             Action Buttons
+             ═══════════════════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between mb-5">
+            <a th:href="@{/insurance}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary-custom btn-lg">
+                <i class="bi bi-check-circle me-1"></i>
+                <span th:text="${insurance.id != null} ? 'Update Insurance' : 'Save Insurance'">Save</span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

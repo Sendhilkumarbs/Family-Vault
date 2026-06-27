@@ -1,0 +1,32 @@
+# Build output
+target/
+*.jar
+*.zip
+
+# Local runtime data (contains personal/family records)
+data/
+dist/data/
+logs/
+
+# Runtime config (may contain email credentials)
+/config/
+
+# Bundled JRE (large; rebuild locally)
+dist/runtime/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db

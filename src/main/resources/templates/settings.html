@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Settings — ' + ${appName}">Settings</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ─── Navbar ─────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <!-- ─── Success / Error Messages ───────────────────────── -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Page Header ────────────────────────────────────── -->
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-gear me-2 text-primary-custom"></i>
+            Application Settings
+        </h3>
+    </div>
+
+    <!-- ─── Config File Info ───────────────────────────────── -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header section-header">
+            <i class="bi bi-info-circle me-2"></i> Configuration File
+        </div>
+        <div class="card-body">
+            <p class="mb-2">
+                <strong>Config File Location:</strong>
+                <code class="ms-2" th:text="${configFilePath}">config/application.properties</code>
+            </p>
+            <p class="mb-0 text-muted small">
+                <i class="bi bi-lightbulb me-1"></i>
+                You can edit this file directly or use the form below. 
+                Changes require application restart to take effect.
+            </p>
+        </div>
+    </div>
+
+    <!-- ─── Email Settings ─────────────────────────────────── -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header section-header"
+             style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
+            <i class="bi bi-envelope me-2"></i> Email Notification Settings
+        </div>
+        <div class="card-body">
+            <form th:action="@{/settings/email}" method="post">
+                
+                <!-- Enable Email Notifications -->
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" 
+                               id="emailNotificationsEnabled" name="emailNotificationsEnabled"
+                               th:checked="${emailNotificationsEnabled == 'true'}"/>
+                        <label class="form-check-label fw-semibold" for="emailNotificationsEnabled">
+                            Enable Email Notifications
+                        </label>
+                    </div>
+                    <small class="text-muted">Send automatic email reminders for FD/RD maturity and insurance renewals</small>
+                </div>
+
+                <!-- Enable Mail Service -->
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" 
+                               id="mailEnabled" name="mailEnabled"
+                               th:checked="${mailEnabled == 'true'}"/>
+                        <label class="form-check-label fw-semibold" for="mailEnabled">
+                            Enable Mail Service
+                        </label>
+                    </div>
+                    <small class="text-muted">Must be enabled for email notifications to work</small>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- SMTP Configuration -->
+                <h5 class="mb-3">SMTP Configuration</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">SMTP Host</label>
+                        <input type="text" class="form-control" name="mailHost" 
+                               th:value="${mailHost}" required
+                               placeholder="e.g. smtp.gmail.com"/>
+                        <small class="text-muted">
+                            Gmail: smtp.gmail.com<br>
+                            Outlook: smtp-mail.outlook.com<br>
+                            Yahoo: smtp.mail.yahoo.com
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">SMTP Port</label>
+                        <input type="text" class="form-control" name="mailPort" 
+                               th:value="${mailPort}" required
+                               placeholder="e.g. 587"/>
+                        <small class="text-muted">Usually 587 for TLS, 465 for SSL</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email Address / Username</label>
+                        <input type="email" class="form-control" name="mailUsername" 
+                               th:value="${mailUsername}" required
+                               placeholder="your-email@gmail.com"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Password / App Password</label>
+                        <input type="password" class="form-control" name="mailPassword" 
+                               th:value="${mailPasswordSet ? '********' : ''}" 
+                               placeholder="Enter password to update"/>
+                        <small class="text-muted">
+                            <span th:if="${mailPasswordSet}" class="text-success">
+                                <i class="bi bi-check-circle me-1"></i>Password is set (enter new password to change)
+                            </span>
+                            <span th:unless="${mailPasswordSet}">
+                                Enter password to set
+                            </span><br>
+                            For Gmail: Use App Password (16 characters)<br>
+                            <a href="https://myaccount.google.com/apppasswords" target="_blank">
+                                Generate App Password
+                            </a>
+                        </small>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-semibold">From Email Address</label>
+                        <input type="email" class="form-control" name="mailFrom" 
+                               th:value="${mailFrom}" required
+                               placeholder="your-email@gmail.com"/>
+                        <small class="text-muted">Email address that will appear as sender</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> After saving, restart the application for email settings to take effect.
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom">
+                        <i class="bi bi-save me-1"></i> Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ─── Quick Help ─────────────────────────────────────── -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header section-header">
+            <i class="bi bi-question-circle me-2"></i> Quick Help
+        </div>
+        <div class="card-body">
+            <h6 class="fw-semibold mb-3">Gmail Setup:</h6>
+            <ol class="mb-4">
+                <li>Enable <strong>2-Step Verification</strong> on your Google account</li>
+                <li>Go to <a href="https://myaccount.google.com/apppasswords" target="_blank">App Passwords</a></li>
+                <li th:text="|Select &quot;Mail&quot; and &quot;Other (Custom name)&quot; → Enter &quot;${appName}&quot;|">Select "Mail" and "Other (Custom name)" → Enter "Family Vault"</li>
+                <li>Copy the 16-character password and paste it in the Password field above</li>
+            </ol>
+            
+            <h6 class="fw-semibold mb-3">Outlook/Hotmail Setup:</h6>
+            <ul class="mb-0">
+                <li>Use your regular email and password</li>
+                <li>SMTP Host: <code>smtp-mail.outlook.com</code></li>
+                <li>Port: <code>587</code></li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

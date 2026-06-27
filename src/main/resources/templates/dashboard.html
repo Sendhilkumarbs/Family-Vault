@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Dashboard — ' + ${appName}">Dashboard</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ─── Navbar ─────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <div class="d-flex align-items-center">
+            <a href="/settings" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-gear me-1"></i> Settings
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <!-- ─── Welcome Header ────────────────────────────────────── -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary-custom mb-2">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </h2>
+        <p class="text-muted fs-5" th:text="${appDescription}">One secure place for your family's important records.</p>
+    </div>
+
+    <!-- ─── Reminders & Alerts Section ────────────────────────── -->
+    <div th:if="${reminders != null and !reminders.isEmpty()}" class="mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning-subtle border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-bell-fill me-2 text-warning"></i>
+                    Reminders &amp; Alerts
+                    <span th:if="${overdueCount > 0}" class="badge bg-danger ms-2" th:text="${overdueCount + ' Overdue'}"></span>
+                    <span th:if="${dueSoonCount > 0}" class="badge bg-warning text-dark ms-2" th:text="${dueSoonCount + ' Due Soon'}"></span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <div th:each="reminder : ${reminders}" class="list-group-item border-0">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0 me-3">
+                                <span th:if="${reminder.overdue}" class="badge bg-danger rounded-circle p-2">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </span>
+                                <span th:unless="${reminder.overdue}" class="badge bg-warning text-dark rounded-circle p-2">
+                                    <i class="bi bi-calendar-event"></i>
+                                </span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-semibold" th:text="${reminder.title}">Reminder Title</h6>
+                                <p class="mb-1 text-muted small" th:text="${reminder.description}">Description</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        <span th:text="${#temporals.format(reminder.dueDate, 'dd/MM/yyyy')}">Date</span>
+                                    </small>
+                                    <span th:if="${reminder.overdue}" class="badge bg-danger" th:text="'Overdue by ' + ${-reminder.daysUntilDue} + ' days'"></span>
+                                    <span th:unless="${reminder.overdue}" class="badge bg-info" th:text="'Due in ' + ${reminder.daysUntilDue} + ' days'"></span>
+                                    <a th:href="@{'/' + ${reminder.entityType.toLowerCase()} + '/view/' + ${reminder.entityId}}" 
+                                       class="btn btn-sm btn-outline-primary ms-auto">
+                                        <i class="bi bi-eye me-1"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Dashboard Tiles ───────────────────────────────────── -->
+    <div class="row g-4 justify-content-center">
+
+        <!-- ─── Bank Accounts Tile ────────────────────────────── -->
+        <div class="col-md-5">
+            <a th:href="@{/accounts}" class="text-decoration-none">
+                <div class="card dashboard-tile shadow border-0 h-100">
+                    <div class="card-body text-center p-5">
+                        <div class="tile-icon mb-4 mx-auto" style="background: linear-gradient(135deg, #1a3a5c 0%, #2b6cb0 100%);">
+                            <i class="bi bi-bank fs-1 text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2 text-dark">Bank Accounts</h3>
+                        <p class="text-muted mb-3">Manage savings, current &amp; joint accounts with all banking credentials.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
+                                <i class="bi bi-credit-card-2-back me-1"></i>
+                                <span th:text="${accountCount}">0</span> Accounts
+                            </span>
+                        </div>
+                        <div class="mt-4">
+                            <span class="btn btn-primary-custom px-4">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Open
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- ─── FD / RD Tile ──────────────────────────────────── -->
+        <div class="col-md-5">
+            <a th:href="@{/deposits}" class="text-decoration-none">
+                <div class="card dashboard-tile shadow border-0 h-100 position-relative">
+                    <div th:if="${reminders != null}" class="position-absolute top-0 end-0 m-2">
+                        <span th:each="reminder : ${reminders}" 
+                              th:if="${reminder.entityType == 'Deposit' and (reminder.overdue or reminder.dueSoon)}"
+                              class="badge bg-danger rounded-circle p-2" 
+                              style="font-size: 0.5rem;" 
+                              title="Upcoming maturity reminder">
+                            <i class="bi bi-bell-fill"></i>
+                        </span>
+                    </div>
+                    <div class="card-body text-center p-5">
+                        <div class="tile-icon mb-4 mx-auto" style="background: linear-gradient(135deg, #276749 0%, #38a169 100%);">
+                            <i class="bi bi-safe fs-1 text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2 text-dark">Fixed &amp; Recurring Deposits</h3>
+                        <p class="text-muted mb-3">Track FD &amp; RD details including maturity, interest rates &amp; nominees.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <span class="badge bg-success-subtle text-success fs-6 px-3 py-2">
+                                <i class="bi bi-piggy-bank me-1"></i>
+                                <span th:text="${fdCount}">0</span> FDs
+                            </span>
+                            <span class="badge bg-info-subtle text-info fs-6 px-3 py-2">
+                                <i class="bi bi-arrow-repeat me-1"></i>
+                                <span th:text="${rdCount}">0</span> RDs
+                            </span>
+                        </div>
+                        <div class="mt-4">
+                            <span class="btn btn-outline-success px-4 fw-semibold">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Open
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- ─── Insurance Tile ──────────────────────────────────── -->
+        <div class="col-md-5">
+            <a th:href="@{/insurance}" class="text-decoration-none">
+                <div class="card dashboard-tile shadow border-0 h-100 position-relative">
+                    <div th:if="${reminders != null}" class="position-absolute top-0 end-0 m-2">
+                        <span th:each="reminder : ${reminders}" 
+                              th:if="${reminder.entityType == 'Insurance' and (reminder.overdue or reminder.dueSoon)}"
+                              class="badge bg-danger rounded-circle p-2" 
+                              style="font-size: 0.5rem;" 
+                              title="Upcoming renewal reminder">
+                            <i class="bi bi-bell-fill"></i>
+                        </span>
+                    </div>
+                    <div class="card-body text-center p-5">
+                        <div class="tile-icon mb-4 mx-auto" style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
+                            <i class="bi bi-shield-check fs-1 text-white"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2 text-dark">Insurance Policies</h3>
+                        <p class="text-muted mb-3">Manage life, health, vehicle &amp; term insurance with renewal tracking.</p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <span class="badge bg-purple-subtle text-purple fs-6 px-3 py-2">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <span th:text="${insuranceCount}">0</span> Policies
+                            </span>
+                        </div>
+                        <div class="mt-4">
+                            <span class="btn btn-outline-purple px-4 fw-semibold">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Open
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ─── Footer ─────────────────────────────────────────── -->
+    <footer class="text-center text-muted py-4 mt-5 border-top">
+        <small th:text="${appName} + ' © 2026 — Data stored locally on your machine.'">Family Vault © 2026 — Data stored locally on your machine.</small>
+    </footer>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

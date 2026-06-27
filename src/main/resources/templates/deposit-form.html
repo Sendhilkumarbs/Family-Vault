@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle} + ' — ' + ${appName}">Deposit Form</title>
+    <link th:href="@{/css/vendor/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/vendor/bootstrap-icons.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary-custom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <i class="bi bi-shield-lock me-2 fs-4"></i>
+            <span class="fw-bold" th:text="${appName}">Family Vault</span>
+        </a>
+        <a th:href="@{/deposits}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Deposits
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="mb-0">
+            <i class="bi bi-pencil-square me-2 text-primary-custom"
+               th:if="${deposit.id != null}"></i>
+            <i class="bi bi-plus-circle me-2 text-primary-custom"
+               th:if="${deposit.id == null}"></i>
+            <span th:text="${pageTitle}">Deposit Form</span>
+        </h3>
+    </div>
+
+    <form th:action="${deposit.id != null}
+              ? @{/deposits/update/{id}(id=${deposit.id})}
+              : @{/deposits/save}"
+          th:object="${deposit}" method="post">
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 1: Personal Information
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-person-fill me-2"></i> Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Person Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{personName}"
+                               placeholder="e.g. Rajesh Kumar" required/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Relationship</label>
+                        <select class="form-select" th:field="*{relationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Self">Self</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 2: Bank & Deposit Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header"
+                 style="background: linear-gradient(135deg, #276749 0%, #38a169 100%);">
+                <i class="bi bi-safe me-2"></i> Deposit Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Bank Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" th:field="*{bankName}"
+                               placeholder="e.g. State Bank of India" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Branch Name</label>
+                        <input type="text" class="form-control" th:field="*{branchName}"
+                               placeholder="e.g. Anna Nagar Branch"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Deposit Type <span class="text-danger">*</span></label>
+                        <select class="form-select" th:field="*{depositType}" required>
+                            <option value="">-- Select --</option>
+                            <option value="FD">Fixed Deposit (FD)</option>
+                            <option value="RD">Recurring Deposit (RD)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Deposit Account Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control font-monospace" th:field="*{depositAccountNumber}"
+                               placeholder="e.g. FD123456789" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Linked Savings/Current A/C</label>
+                        <input type="text" class="form-control font-monospace" th:field="*{linkedAccountNumber}"
+                               placeholder="e.g. 1234567890123456"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" id="amountLabel">Deposit Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" th:field="*{depositAmount}"
+                                   placeholder="e.g. 1,00,000"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 3: Tenure & Interest Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header"
+                 style="background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);">
+                <i class="bi bi-graph-up-arrow me-2"></i> Tenure &amp; Interest Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Interest Rate</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" th:field="*{interestRate}"
+                                   placeholder="e.g. 7.25"/>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Tenure / Period</label>
+                        <input type="text" class="form-control" th:field="*{tenure}"
+                               placeholder="e.g. 1 Year, 365 Days"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Start Date</label>
+                        <input type="text" class="form-control" th:field="*{startDate}"
+                               placeholder="e.g. 01/01/2025"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Maturity Date</label>
+                        <input type="text" class="form-control" th:field="*{maturityDate}"
+                               placeholder="e.g. 01/01/2026"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Maturity Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" th:field="*{maturityAmount}"
+                                   placeholder="e.g. 1,07,250"/>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Interest Payout</label>
+                        <select class="form-select" th:field="*{interestPayout}">
+                            <option value="">-- Select --</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Quarterly">Quarterly</option>
+                            <option value="Half-Yearly">Half-Yearly</option>
+                            <option value="Yearly">Yearly</option>
+                            <option value="At Maturity">At Maturity</option>
+                            <option value="Cumulative">Cumulative</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Auto Renewal</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" th:field="*{autoRenewal}" id="autoRenewalSwitch"/>
+                            <label class="form-check-label" for="autoRenewalSwitch">
+                                Yes, auto-renew on maturity
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SECTION 4: Nominee & Additional Details
+             ═══════════════════════════════════════════════════════ -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header section-header">
+                <i class="bi bi-info-circle me-2"></i> Nominee &amp; Additional Details
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Name</label>
+                        <input type="text" class="form-control" th:field="*{nomineeName}"
+                               placeholder="e.g. Priya Kumar"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Nominee Relationship</label>
+                        <select class="form-select" th:field="*{nomineeRelationship}">
+                            <option value="">-- Select --</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Brother">Brother</option>
+                            <option value="Sister">Sister</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">
+                            Email Address <small class="text-muted">(for reminders)</small>
+                        </label>
+                        <input type="email" class="form-control" th:field="*{emailAddress}"
+                               placeholder="e.g. rajesh@example.com"/>
+                        <small class="text-muted">Free email notifications will be sent 7 days before maturity</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Remarks / Notes</label>
+                        <textarea class="form-control" th:field="*{remarks}" rows="3"
+                                  placeholder="Any additional notes about this deposit..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             Action Buttons
+             ═══════════════════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between mb-5">
+            <a th:href="@{/deposits}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary-custom btn-lg">
+                <i class="bi bi-check-circle me-1"></i>
+                <span th:text="${deposit.id != null} ? 'Update Deposit' : 'Save Deposit'">Save</span>
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/vendor/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
